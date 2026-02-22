@@ -277,7 +277,10 @@ final class StockViewModel {
     }
 
     private func saveTimeFramePreferences() {
-        let raw = pageTimeFrames.mapValues { $0.rawValue }
+        var raw: [String: Int] = [:]
+        for (key, value) in pageTimeFrames {
+            raw[String(key)] = value.rawValue
+        }
         UserDefaults.standard.set(raw, forKey: timeFramesKey)
     }
 
