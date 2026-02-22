@@ -22,6 +22,8 @@
 		AA100001002C00000000000D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200001002C00000000000D /* Theme.swift */; };
 		AA100001002C00000000000E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA200001002C00000000000E /* Assets.xcassets */; };
 		AA100001002C00000000000F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA200001002C00000000000F /* Preview Assets.xcassets */; };
+		AA100001002C000000000011 /* FinanceAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200001002C000000000011 /* FinanceAPIService.swift */; };
+		AA100001002C000000000012 /* TickerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200001002C000000000012 /* TickerDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +43,8 @@
 		AA200001002C00000000000E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA200001002C00000000000F /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		AA200001002C000000000010 /* StockTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StockTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA200001002C000000000011 /* FinanceAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceAPIService.swift; sourceTree = "<group>"; };
+		AA200001002C000000000012 /* TickerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickerDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +93,7 @@
 			isa = PBXGroup;
 			children = (
 				AA200001002C000000000005 /* StockDataService.swift */,
+				AA200001002C000000000011 /* FinanceAPIService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -112,6 +117,7 @@
 				AA200001002C00000000000A /* ComparisonRowView.swift */,
 				AA200001002C00000000000B /* AddTickerView.swift */,
 				AA200001002C00000000000C /* MiniChartView.swift */,
+				AA200001002C000000000012 /* TickerDetailView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -215,6 +221,8 @@
 				AA100001002C00000000000B /* AddTickerView.swift in Sources */,
 				AA100001002C00000000000C /* MiniChartView.swift in Sources */,
 				AA100001002C00000000000D /* Theme.swift in Sources */,
+				AA100001002C000000000011 /* FinanceAPIService.swift in Sources */,
+				AA100001002C000000000012 /* TickerDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

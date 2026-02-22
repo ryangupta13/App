@@ -3,6 +3,7 @@ import SwiftUI
 struct TickerListView: View {
     @Environment(StockViewModel.self) var viewModel
     @State private var editMode: EditMode = .inactive
+    @State private var showMetricPicker = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -20,6 +21,30 @@ struct TickerListView: View {
                 Spacer()
 
                 HStack(spacing: 12) {
+                    // Refresh button
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .tint(Theme.textTertiary)
+                            .scaleEffect(0.8)
+                    } else {
+                        Button {
+                            Task { await viewModel.refreshPrices() }
+                        } label: {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 18))
+                                .foregroundStyle(Theme.textSecondary)
+                        }
+                    }
+
+                    // Metrics customization
+                    Button {
+                        showMetricPicker = true
+                    } label: {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.system(size: 18))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+
                     Button {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                             editMode = editMode == .active ? .inactive : .active
@@ -43,23 +68,8 @@ struct TickerListView: View {
             .padding(.top, 4)
             .padding(.bottom, 12)
 
-            // Metric labels
-            HStack {
-                Text("ASSET")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Spacer()
-                Text("CHART")
-                    .frame(width: 60)
-                Text("PRICE")
-                    .frame(width: 80, alignment: .trailing)
-            }
-            .font(.system(size: 10, weight: .semibold))
-            .foregroundStyle(Theme.textTertiary)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 8)
-
             // Ticker list
-            if viewModel.tickers.isEmpty {
+            if viewModel.tickers.isEmpty && !viewModel.isLoading {
                 emptyState
             } else {
                 List {
@@ -81,6 +91,12 @@ struct TickerListView: View {
                 .environment(\.editMode, $editMode)
             }
         }
+        .sheet(isPresented: $showMetricPicker) {
+            MetricPickerView(selectedMetrics: viewModel.homeMetrics) { metrics in
+                viewModel.setHomeMetrics(metrics)
+            }
+            .presentationDetents([.medium, .large])
+        }
     }
 
     private var emptyState: some View {
@@ -92,7 +108,7 @@ struct TickerListView: View {
             Text("No assets tracked")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(Theme.textSecondary)
-            Text("Tap + to add stocks and crypto")
+            Text("Tap + to add stocks, crypto & more")
                 .font(.system(size: 14))
                 .foregroundStyle(Theme.textTertiary)
             Button {
@@ -108,6 +124,73 @@ struct TickerListView: View {
             }
             .padding(.top, 8)
             Spacer()
+        }
+    }
+}
+
+// MARK: - Metric Picker
+
+struct MetricPickerView: View {
+    @Environment(\.dismiss) var dismiss
+    @State var selectedMetrics: [TickerMetric]
+    let onSave: ([TickerMetric]) -> Void
+
+    private let allSwappable: [TickerMetric] = TickerMetric.defaultHomeMetrics + TickerMetric.additionalMetrics
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Theme.background.ignoresSafeArea()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Choose which metrics appear on the watchlist cards. Tap to toggle.")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Theme.textTertiary)
+                            .padding(.horizontal, 16)
+
+                        LazyVStack(spacing: 6) {
+                            ForEach(allSwappable) { metric in
+                                let isSelected = selectedMetrics.contains(metric)
+                                Button {
+                                    if isSelected {
+                                        selectedMetrics.removeAll { $0 == metric }
+                                    } else {
+                                        selectedMetrics.append(metric)
+                                    }
+                                } label: {
+                                    HStack {
+                                        Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                            .foregroundStyle(isSelected ? Theme.accent : Theme.textTertiary)
+                                        Text(metric.rawValue)
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundStyle(Theme.textPrimary)
+                                        Spacer()
+                                    }
+                                    .padding(12)
+                                    .background(isSelected ? Theme.accent.opacity(0.08) : Theme.surfaceElevated)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                    }
+                    .padding(.vertical, 12)
+                }
+            }
+            .navigationTitle("Customize Metrics")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        onSave(selectedMetrics)
+                        dismiss()
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Theme.accent)
+                }
+            }
+            .toolbarBackground(Theme.background, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
         }
     }
 }

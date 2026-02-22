@@ -19,18 +19,36 @@ struct ContentView: View {
                     TickerListView()
                         .tag(0)
 
-                    ForEach(TimeFrame.allCases) { timeFrame in
-                        ComparisonPageView(timeFrame: timeFrame)
-                            .tag(timeFrame.rawValue + 1)
+                    ForEach(1...4, id: \.self) { pageIdx in
+                        ComparisonPageView(pageIndex: pageIdx)
+                            .tag(pageIdx)
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.3), value: vm.currentPage)
             }
+
+            // Loading overlay on first launch
+            if viewModel.isLoading && viewModel.tickers.isEmpty {
+                ZStack {
+                    Theme.background.ignoresSafeArea()
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .tint(Theme.accent)
+                            .scaleEffect(1.2)
+                        Text("Loading market data...")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
+                }
+            }
         }
         .sheet(isPresented: $vm.showingAddTicker) {
             AddTickerView()
                 .environment(viewModel)
+        }
+        .task {
+            await viewModel.loadInitialData()
         }
     }
 }

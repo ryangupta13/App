@@ -1,8 +1,8 @@
 import SwiftUI
+import Charts
 
 struct ComparisonRowView: View {
     let comparison: TickerComparison
-    let timeFrame: TimeFrame
 
     private var isOutperforming: Bool {
         comparison.relativePerformance >= 0
@@ -18,7 +18,7 @@ struct ComparisonRowView: View {
                             .font(.system(size: 17, weight: .bold, design: .rounded))
                             .foregroundStyle(Theme.textPrimary)
 
-                        Text("vs")
+                        Text("/")
                             .font(.system(size: 11, weight: .medium))
                             .foregroundStyle(Theme.textTertiary)
 
@@ -51,13 +51,11 @@ struct ComparisonRowView: View {
                 }
             }
 
-            // Chart
-            ComparisonChartView(
-                tickerData: comparison.tickerNormalized,
-                benchmarkData: comparison.benchmarkNormalized,
+            // Ratio Chart with interactive scrubbing
+            RatioChartView(
+                ratioPoints: comparison.ratioPoints,
                 tickerSymbol: comparison.ticker.symbol,
-                benchmarkSymbol: comparison.benchmarkTicker.symbol,
-                isOutperforming: isOutperforming
+                benchmarkSymbol: comparison.benchmarkTicker.symbol
             )
             .frame(height: 100)
 
@@ -95,6 +93,140 @@ struct ComparisonRowView: View {
     }
 }
 
+// MARK: - Ratio Chart with Interactive Scrubbing
+
+struct RatioChartView: View {
+    let ratioPoints: [RatioPoint]
+    let tickerSymbol: String
+    let benchmarkSymbol: String
+
+    @State private var scrubIndex: Int?
+
+    private var currentRatio: Double {
+        ratioPoints.last?.ratio ?? 0
+    }
+
+    private var scrubRatio: Double? {
+        guard let idx = scrubIndex, idx < ratioPoints.count else { return nil }
+        return ratioPoints[idx].ratio
+    }
+
+    private var scrubDate: Date? {
+        guard let idx = scrubIndex, idx < ratioPoints.count else { return nil }
+        return ratioPoints[idx].date
+    }
+
+    var body: some View {
+        if ratioPoints.count >= 2 {
+            VStack(spacing: 4) {
+                // Scrub info overlay
+                if let ratio = scrubRatio, let date = scrubDate {
+                    HStack {
+                        Text(date.formatted(date: .abbreviated, time: .omitted))
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(Theme.textTertiary)
+                        Spacer()
+                        Text(String(format: "%.4f", ratio))
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundStyle(Theme.accent)
+                    }
+                }
+
+                ratioChart
+            }
+        } else {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Theme.cardBorder.opacity(0.2))
+                .overlay(
+                    Text("No data")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Theme.textTertiary)
+                )
+        }
+    }
+
+    private var ratioChart: some View {
+        let isUp = (ratioPoints.last?.ratio ?? 0) >= (ratioPoints.first?.ratio ?? 0)
+        let lineColor = isUp ? Theme.positive : Theme.negative
+
+        return Chart {
+            ForEach(Array(ratioPoints.enumerated()), id: \.offset) { index, point in
+                LineMark(
+                    x: .value("Time", index),
+                    y: .value("Ratio", point.ratio)
+                )
+                .foregroundStyle(lineColor)
+                .interpolationMethod(.catmullRom)
+                .lineStyle(StrokeStyle(lineWidth: 2))
+            }
+
+            // Current ratio annotation at rightmost point
+            if let last = ratioPoints.last {
+                PointMark(
+                    x: .value("Time", ratioPoints.count - 1),
+                    y: .value("Ratio", last.ratio)
+                )
+                .foregroundStyle(lineColor)
+                .symbolSize(24)
+                .annotation(position: .topLeading, spacing: 4) {
+                    Text(String(format: "%.4f", last.ratio))
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .foregroundStyle(lineColor)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(Theme.cardBackground.opacity(0.9))
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+            }
+
+            // Scrub line
+            if let idx = scrubIndex, idx < ratioPoints.count {
+                RuleMark(x: .value("Scrub", idx))
+                    .foregroundStyle(Theme.textTertiary.opacity(0.5))
+                    .lineStyle(StrokeStyle(lineWidth: 1))
+
+                PointMark(
+                    x: .value("Time", idx),
+                    y: .value("Ratio", ratioPoints[idx].ratio)
+                )
+                .foregroundStyle(Theme.accent)
+                .symbolSize(36)
+            }
+        }
+        .chartXAxis(.hidden)
+        .chartYAxis {
+            AxisMarks(position: .trailing) { value in
+                AxisValueLabel {
+                    if let v = value.as(Double.self) {
+                        Text(String(format: "%.3f", v))
+                            .font(.system(size: 8, design: .rounded))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                }
+            }
+        }
+        .chartLegend(.hidden)
+        .chartOverlay { proxy in
+            GeometryReader { _ in
+                Rectangle()
+                    .fill(Color.clear)
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { value in
+                                if let idx: Int = proxy.value(atX: value.location.x) {
+                                    scrubIndex = max(0, min(idx, ratioPoints.count - 1))
+                                }
+                            }
+                            .onEnded { _ in
+                                scrubIndex = nil
+                            }
+                    )
+            }
+        }
+    }
+}
+
 // MARK: - Comparison Metric
 
 struct ComparisonMetric: View {
@@ -117,14 +249,10 @@ struct ComparisonMetric: View {
 
 #Preview {
     let vm = StockViewModel()
-    let comparisons = vm.comparisons(for: .week)
-
     ZStack {
         Theme.background.ignoresSafeArea()
-        if let comparison = comparisons.first {
-            ComparisonRowView(comparison: comparison, timeFrame: .week)
-                .padding()
-        }
+        Text("Preview")
+            .foregroundStyle(.white)
     }
     .preferredColorScheme(.dark)
 }

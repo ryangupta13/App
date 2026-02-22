@@ -54,8 +54,23 @@ enum Theme {
             return String(format: "$%.1f", price)
         } else if price >= 1 {
             return String(format: "$%.2f", price)
-        } else {
+        } else if price > 0 {
             return String(format: "$%.4f", price)
+        } else {
+            return "N/A"
+        }
+    }
+
+    static func formatPriceSigned(_ price: Double) -> String {
+        let sign = price >= 0 ? "+" : ""
+        if abs(price) >= 1000 {
+            return String(format: "%@$%.1f", sign, abs(price))
+        } else if abs(price) >= 1 {
+            return String(format: "%@$%.2f", sign, price)
+        } else if abs(price) > 0 {
+            return String(format: "%@$%.4f", sign, price)
+        } else {
+            return "$0.00"
         }
     }
 
@@ -83,8 +98,10 @@ enum Theme {
             return String(format: "$%.1fB", cap / 1_000_000_000)
         } else if cap >= 1_000_000 {
             return String(format: "$%.1fM", cap / 1_000_000)
-        } else {
+        } else if cap > 0 {
             return String(format: "$%.0f", cap)
+        } else {
+            return "N/A"
         }
     }
 
