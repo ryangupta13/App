@@ -60,12 +60,15 @@ struct AddTickerView: View {
                         ScrollView {
                             LazyVStack(spacing: 6) {
                                 ForEach(viewModel.searchResults) { item in
-                                    if !addedSymbols.contains(item.yahooSymbol) {
-                                        AddTickerSearchRow(item: item, isAdding: viewModel.addingSymbol == item.yahooSymbol) {
-                                            addedSymbols.insert(item.yahooSymbol)
-                                            Task {
-                                                await viewModel.addTicker(from: item)
-                                            }
+                                    let alreadyTracked = viewModel.isTickerInWatchlist(item.yahooSymbol) || addedSymbols.contains(item.yahooSymbol)
+                                    AddTickerSearchRow(
+                                        item: item,
+                                        isAdding: viewModel.addingSymbol == item.yahooSymbol,
+                                        alreadyTracked: alreadyTracked
+                                    ) {
+                                        addedSymbols.insert(item.yahooSymbol)
+                                        Task {
+                                            await viewModel.addTicker(from: item)
                                         }
                                     }
                                 }
@@ -138,6 +141,7 @@ struct AddTickerView: View {
 struct AddTickerSearchRow: View {
     let item: TickerSearchItem
     let isAdding: Bool
+    var alreadyTracked: Bool = false
     let onAdd: () -> Void
     @State private var isPressed = false
 
@@ -155,10 +159,10 @@ struct AddTickerSearchRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.displaySymbol)
                     .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundStyle(Theme.textPrimary)
+                    .foregroundStyle(alreadyTracked ? Theme.textSecondary : Theme.textPrimary)
                 Text(item.name)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Theme.textSecondary)
+                    .foregroundStyle(alreadyTracked ? Theme.textTertiary : Theme.textSecondary)
                     .lineLimit(1)
             }
 
@@ -173,7 +177,11 @@ struct AddTickerSearchRow: View {
                     .foregroundStyle(Theme.textTertiary)
             }
 
-            if isAdding {
+            if alreadyTracked {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 28))
+                    .foregroundStyle(Theme.positive)
+            } else if isAdding {
                 ProgressView()
                     .tint(Theme.accent)
                     .frame(width: 28, height: 28)

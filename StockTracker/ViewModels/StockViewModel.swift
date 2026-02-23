@@ -211,12 +211,14 @@ final class StockViewModel {
         }
         await MainActor.run { isSearching = true }
         let results = await service.searchTickers(query: trimmed)
-        let existing = Set(tickers.map { $0.yahooSymbol })
-        let filtered = results.filter { !existing.contains($0.yahooSymbol) }
         await MainActor.run {
-            searchResults = filtered
+            searchResults = results
             isSearching = false
         }
+    }
+
+    func isTickerInWatchlist(_ yahooSymbol: String) -> Bool {
+        tickers.contains { $0.yahooSymbol == yahooSymbol }
     }
 
     // MARK: - Benchmark

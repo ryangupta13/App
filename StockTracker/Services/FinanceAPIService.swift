@@ -48,7 +48,7 @@ actor FinanceAPIService {
         let searchResponse = try JSONDecoder().decode(YFSearchResponse.self, from: data)
 
         return searchResponse.quotes.compactMap { quote in
-            guard quote.isYahooFinance == true else { return nil }
+            guard quote.isYahooFinance != false else { return nil }
 
             let assetType: Ticker.AssetType
             switch quote.quoteType?.uppercased() {
