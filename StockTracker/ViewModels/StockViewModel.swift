@@ -1,5 +1,6 @@
 import SwiftUI
 import Observation
+import WidgetKit
 
 @Observable
 final class StockViewModel {
@@ -325,6 +326,20 @@ final class StockViewModel {
         if let data = try? JSONEncoder().encode(tickers) {
             UserDefaults.standard.set(data, forKey: storageKey)
         }
+        syncTickersToWidget()
+    }
+
+    private func syncTickersToWidget() {
+        let widgetData = tickers.map {
+            WidgetTickerData(
+                symbol: $0.symbol,
+                yahooSymbol: $0.yahooSymbol,
+                name: $0.name,
+                assetType: $0.assetType.rawValue
+            )
+        }
+        WidgetDataStore.saveTickers(widgetData)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     private func loadTickers() {

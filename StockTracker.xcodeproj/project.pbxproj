@@ -24,7 +24,40 @@
 		AA100001002C00000000000F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA200001002C00000000000F /* Preview Assets.xcassets */; };
 		AA100001002C000000000011 /* FinanceAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200001002C000000000011 /* FinanceAPIService.swift */; };
 		AA100001002C000000000012 /* TickerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200001002C000000000012 /* TickerDetailView.swift */; };
+		CC100001002C000000000001 /* WidgetSharedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200001002C000000000001 /* WidgetSharedData.swift */; };
+		BB100001002C000000000001 /* StockTrackerWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB200001002C000000000001 /* StockTrackerWidgetBundle.swift */; };
+		BB100001002C000000000002 /* WatchlistWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB200001002C000000000002 /* WatchlistWidget.swift */; };
+		BB100001002C000000000003 /* BenchmarkWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB200001002C000000000003 /* BenchmarkWidget.swift */; };
+		BB100001002C000000000004 /* WidgetAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB200001002C000000000004 /* WidgetAPIService.swift */; };
+		BB100001002C000000000005 /* WidgetTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB200001002C000000000005 /* WidgetTheme.swift */; };
+		BB100001002C000000000006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB200001002C000000000006 /* Assets.xcassets */; };
+		BB100001002C000000000007 /* WidgetSharedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC200001002C000000000001 /* WidgetSharedData.swift */; };
+		BB100001002C000000000008 /* StockTrackerWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = BB200001002C000000000007 /* StockTrackerWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BBA00001002C000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA800001002C000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BB500001002C000000000001;
+			remoteInfo = StockTrackerWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BBC00001002C000000000001 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				BB100001002C000000000008 /* StockTrackerWidgetExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		AA200001002C000000000001 /* StockTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockTrackerApp.swift; sourceTree = "<group>"; };
@@ -45,10 +78,27 @@
 		AA200001002C000000000010 /* StockTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StockTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA200001002C000000000011 /* FinanceAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinanceAPIService.swift; sourceTree = "<group>"; };
 		AA200001002C000000000012 /* TickerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickerDetailView.swift; sourceTree = "<group>"; };
+		CC200001002C000000000001 /* WidgetSharedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSharedData.swift; sourceTree = "<group>"; };
+		CC200001002C000000000002 /* StockTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StockTracker.entitlements; sourceTree = "<group>"; };
+		BB200001002C000000000001 /* StockTrackerWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockTrackerWidgetBundle.swift; sourceTree = "<group>"; };
+		BB200001002C000000000002 /* WatchlistWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistWidget.swift; sourceTree = "<group>"; };
+		BB200001002C000000000003 /* BenchmarkWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkWidget.swift; sourceTree = "<group>"; };
+		BB200001002C000000000004 /* WidgetAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetAPIService.swift; sourceTree = "<group>"; };
+		BB200001002C000000000005 /* WidgetTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTheme.swift; sourceTree = "<group>"; };
+		BB200001002C000000000006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BB200001002C000000000007 /* StockTrackerWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = StockTrackerWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB200001002C000000000008 /* StockTrackerWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StockTrackerWidget.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AA300001002C000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB300001002C000000000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -62,6 +112,8 @@
 			isa = PBXGroup;
 			children = (
 				AA400001002C000000000002 /* StockTracker */,
+				CC400001002C000000000001 /* Shared */,
+				BB400001002C000000000001 /* StockTrackerWidget */,
 				AA400001002C000000000007 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -70,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				AA200001002C000000000001 /* StockTrackerApp.swift */,
+				CC200001002C000000000002 /* StockTracker.entitlements */,
 				AA400001002C000000000003 /* Models */,
 				AA400001002C000000000004 /* Services */,
 				AA400001002C000000000005 /* ViewModels */,
@@ -126,6 +179,7 @@
 			isa = PBXGroup;
 			children = (
 				AA200001002C000000000010 /* StockTracker.app */,
+				BB200001002C000000000007 /* StockTrackerWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -138,6 +192,28 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		CC400001002C000000000001 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				CC200001002C000000000001 /* WidgetSharedData.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		BB400001002C000000000001 /* StockTrackerWidget */ = {
+			isa = PBXGroup;
+			children = (
+				BB200001002C000000000001 /* StockTrackerWidgetBundle.swift */,
+				BB200001002C000000000002 /* WatchlistWidget.swift */,
+				BB200001002C000000000003 /* BenchmarkWidget.swift */,
+				BB200001002C000000000004 /* WidgetAPIService.swift */,
+				BB200001002C000000000005 /* WidgetTheme.swift */,
+				BB200001002C000000000006 /* Assets.xcassets */,
+				BB200001002C000000000008 /* StockTrackerWidget.entitlements */,
+			);
+			path = StockTrackerWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -148,15 +224,34 @@
 				AA600001002C000000000001 /* Sources */,
 				AA300001002C000000000001 /* Frameworks */,
 				AA600001002C000000000002 /* Resources */,
+				BBC00001002C000000000001 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				BBB00001002C000000000001 /* PBXTargetDependency */,
 			);
 			name = StockTracker;
 			productName = StockTracker;
 			productReference = AA200001002C000000000010 /* StockTracker.app */;
 			productType = "com.apple.product-type.application";
+		};
+		BB500001002C000000000001 /* StockTrackerWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BB700001002C000000000001 /* Build configuration list for PBXNativeTarget "StockTrackerWidgetExtension" */;
+			buildPhases = (
+				BB600001002C000000000001 /* Sources */,
+				BB300001002C000000000001 /* Frameworks */,
+				BB600001002C000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StockTrackerWidgetExtension;
+			productName = StockTrackerWidgetExtension;
+			productReference = BB200001002C000000000007 /* StockTrackerWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -169,6 +264,9 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					AA500001002C000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					BB500001002C000000000001 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
@@ -187,6 +285,7 @@
 			projectRoot = "";
 			targets = (
 				AA500001002C000000000001 /* StockTracker */,
+				BB500001002C000000000001 /* StockTrackerWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -198,6 +297,14 @@
 			files = (
 				AA100001002C00000000000F /* Preview Assets.xcassets in Resources */,
 				AA100001002C00000000000E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB600001002C000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB100001002C000000000006 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -223,10 +330,32 @@
 				AA100001002C00000000000D /* Theme.swift in Sources */,
 				AA100001002C000000000011 /* FinanceAPIService.swift in Sources */,
 				AA100001002C000000000012 /* TickerDetailView.swift in Sources */,
+				CC100001002C000000000001 /* WidgetSharedData.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB600001002C000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB100001002C000000000001 /* StockTrackerWidgetBundle.swift in Sources */,
+				BB100001002C000000000002 /* WatchlistWidget.swift in Sources */,
+				BB100001002C000000000003 /* BenchmarkWidget.swift in Sources */,
+				BB100001002C000000000004 /* WidgetAPIService.swift in Sources */,
+				BB100001002C000000000005 /* WidgetTheme.swift in Sources */,
+				BB100001002C000000000007 /* WidgetSharedData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BBB00001002C000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BB500001002C000000000001 /* StockTrackerWidgetExtension */;
+			targetProxy = BBA00001002C000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		AA900001002C000000000001 /* Debug */ = {
@@ -349,8 +478,10 @@
 		AA900001002C000000000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = StockTracker/StockTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"StockTracker/Preview Content\"";
@@ -381,8 +512,10 @@
 		AA900001002C000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = StockTracker/StockTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"StockTracker/Preview Content\"";
@@ -410,6 +543,64 @@
 			};
 			name = Release;
 		};
+		BB900001002C000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = StockTrackerWidget/StockTrackerWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = StockTrackerWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stocktracker.app.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BB900001002C000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = StockTrackerWidget/StockTrackerWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = StockTrackerWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.stocktracker.app.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -427,6 +618,15 @@
 			buildConfigurations = (
 				AA900001002C000000000003 /* Debug */,
 				AA900001002C000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BB700001002C000000000001 /* Build configuration list for PBXNativeTarget "StockTrackerWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BB900001002C000000000001 /* Debug */,
+				BB900001002C000000000002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
