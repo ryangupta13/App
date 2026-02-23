@@ -105,8 +105,10 @@ final class StockViewModel {
             await refreshPrices()
         }
 
-        // Load sparklines
-        await loadSparklines()
+        // Load sparklines and fundamentals in parallel
+        async let sparklinesTask: () = loadSparklines()
+        async let fundamentalsTask: () = loadAllFundamentals()
+        _ = await (sparklinesTask, fundamentalsTask)
 
         // Load period changes if not using default intraday
         if watchlistChangeTimeFrame != .day {
@@ -121,10 +123,13 @@ final class StockViewModel {
         let refreshed = await service.refreshTickers(tickers)
         await MainActor.run {
             tickers = refreshed
+            fundamentalsCache = [:]  // Clear cache to get fresh data
             saveTickers()
             isLoading = false
         }
-        await loadSparklines()
+        async let sparklinesTask: () = loadSparklines()
+        async let fundamentalsTask: () = loadAllFundamentals()
+        _ = await (sparklinesTask, fundamentalsTask)
     }
 
     // MARK: - Sparklines
@@ -161,10 +166,16 @@ final class StockViewModel {
                 saveTickers()
                 addingSymbol = nil
             }
-            // Fetch sparkline for the new ticker
-            let data = await service.fetchSparkline(for: ticker)
+            // Fetch sparkline and fundamentals for the new ticker
+            async let sparklineData = service.fetchSparkline(for: ticker)
+            async let fundData = service.fetchFundamentals(for: ticker)
+            let sparkResult = await sparklineData
+            let fundResult = await fundData
             await MainActor.run {
-                sparklines[ticker.yahooSymbol] = data
+                sparklines[ticker.yahooSymbol] = sparkResult
+                if let fundResult = fundResult {
+                    fundamentalsCache[ticker.yahooSymbol] = fundResult
+                }
             }
         } else {
             await MainActor.run { addingSymbol = nil }
@@ -258,6 +269,19 @@ final class StockViewModel {
             }
         }
         return data
+    }
+
+    func loadAllFundamentals() async {
+        for ticker in tickers {
+            if fundamentalsCache[ticker.yahooSymbol] == nil {
+                let data = await service.fetchFundamentals(for: ticker)
+                if let data = data {
+                    await MainActor.run {
+                        fundamentalsCache[ticker.yahooSymbol] = data
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Watchlist % Change Timeframe

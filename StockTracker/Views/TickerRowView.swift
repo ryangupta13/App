@@ -85,26 +85,105 @@ struct TickerRowView: View {
     }
 
     private func metricDisplay(_ metric: TickerMetric) -> (String, String) {
+        let fund = viewModel.fundamentalsCache[ticker.yahooSymbol]
+
         switch metric {
         case .currentPrice:
             return ("Price", Theme.formatPrice(ticker.currentPrice))
         case .dayChange:
             return ("Chg", "\(Theme.formatPriceSigned(ticker.dayChange)) (\(Theme.formatChange(ticker.dayChangePercent)))")
         case .marketCap:
-            return ("MCap", ticker.marketCap > 0 ? Theme.formatMarketCap(ticker.marketCap) : "***")
+            let cap = fund?.marketCap ?? ticker.marketCap
+            return ("MCap", cap > 0 ? Theme.formatMarketCap(cap) : "***")
         case .fiftyTwoWeekRange:
-            if ticker.fiftyTwoWeekLow > 0 && ticker.fiftyTwoWeekHigh > 0 {
-                return ("52W", "\(Theme.formatPrice(ticker.fiftyTwoWeekLow)) - \(Theme.formatPrice(ticker.fiftyTwoWeekHigh))")
+            let low = fund?.fiftyTwoWeekLow ?? ticker.fiftyTwoWeekLow
+            let high = fund?.fiftyTwoWeekHigh ?? ticker.fiftyTwoWeekHigh
+            if low > 0 && high > 0 {
+                return ("52W", "\(Theme.formatPrice(low)) - \(Theme.formatPrice(high))")
             }
             return ("52W", "***")
         case .volumeVsAverage:
             let vol = Theme.formatVolume(ticker.volume)
-            let avg = ticker.averageVolume > 0 ? Theme.formatVolume(ticker.averageVolume) : "***"
+            let avgVol = fund?.averageVolume ?? ticker.averageVolume
+            let avg = avgVol > 0 ? Theme.formatVolume(avgVol) : "***"
             return ("Vol", "\(vol) / \(avg)")
         case .movingAvg50:
             return ("MA50", ticker.movingAverage50 > 0 ? Theme.formatPrice(ticker.movingAverage50) : "***")
-        default:
-            return (String(metric.rawValue.prefix(6)), "***")
+        case .trailingPE:
+            if let pe = fund?.trailingPE {
+                return ("P/E", String(format: "%.2f", pe))
+            }
+            return ("P/E", "***")
+        case .forwardPE:
+            if let pe = fund?.forwardPE {
+                return ("Fwd P/E", String(format: "%.2f", pe))
+            }
+            return ("Fwd P/E", "***")
+        case .trailingEPS:
+            if let eps = fund?.trailingEPS {
+                return ("EPS", String(format: "$%.2f", eps))
+            }
+            return ("EPS", "***")
+        case .revenueTTM:
+            if let rev = fund?.revenueTTM, rev > 0 {
+                return ("Rev", Theme.formatMarketCap(rev))
+            }
+            return ("Rev", "***")
+        case .revenueGrowthYoY:
+            if let growth = fund?.revenueGrowthYoY {
+                return ("RevGr", Theme.formatChange(growth))
+            }
+            return ("RevGr", "***")
+        case .netMargin:
+            if let margin = fund?.netMargin {
+                return ("Margin", String(format: "%.1f%%", margin))
+            }
+            return ("Margin", "***")
+        case .freeCashFlow:
+            if let fcf = fund?.freeCashFlow {
+                return ("FCF", Theme.formatMarketCap(fcf))
+            }
+            return ("FCF", "***")
+        case .debtToEquity:
+            if let de = fund?.debtToEquity {
+                return ("D/E", String(format: "%.1f", de))
+            }
+            return ("D/E", "***")
+        case .dividendYield:
+            if let dy = fund?.dividendYield {
+                return ("Div", String(format: "%.2f%%", dy))
+            }
+            return ("Div", "***")
+        case .beta:
+            if let b = fund?.beta {
+                return ("Beta", String(format: "%.2f", b))
+            }
+            return ("Beta", "***")
+        case .shortInterest:
+            if let si = fund?.shortPercentFloat {
+                return ("Short", String(format: "%.1f%%", si))
+            }
+            return ("Short", "***")
+        case .analystRating:
+            if let rating = fund?.analystRating, !rating.isEmpty {
+                return ("Rating", rating.capitalized)
+            }
+            return ("Rating", "***")
+        case .avgPriceTarget:
+            if let target = fund?.averagePriceTarget, target > 0 {
+                return ("Target", Theme.formatPrice(target))
+            }
+            return ("Target", "***")
+        case .fiftyTwoWeekChange:
+            if let change = fund?.fiftyTwoWeekChange {
+                return ("52WΔ", Theme.formatChange(change))
+            }
+            return ("52WΔ", "***")
+        case .evToEBITDA:
+            if let ev = fund?.evToEBITDA {
+                return ("EV/EB", String(format: "%.1f", ev))
+            }
+            return ("EV/EB", "***")
         }
     }
 }
