@@ -72,6 +72,7 @@ final class StockDataService: @unchecked Sendable {
             updated.dayChangePercent = q.dayChangePercent
             updated.movingAverage50 = q.movingAverage50
             updated.volume = q.volume
+            if q.marketCap > 0 { updated.marketCap = q.marketCap }
             if q.fiftyTwoWeekHigh > 0 { updated.fiftyTwoWeekHigh = q.fiftyTwoWeekHigh }
             if q.fiftyTwoWeekLow > 0 { updated.fiftyTwoWeekLow = q.fiftyTwoWeekLow }
             if q.averageVolume > 0 { updated.averageVolume = q.averageVolume }

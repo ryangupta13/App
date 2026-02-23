@@ -4,6 +4,7 @@ struct TickerListView: View {
     @Environment(StockViewModel.self) var viewModel
     @State private var editMode: EditMode = .inactive
     @State private var showMetricPicker = false
+    @State private var showTimeFramePicker = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -66,7 +67,39 @@ struct TickerListView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 4)
-            .padding(.bottom, 12)
+            .padding(.bottom, 4)
+
+            // Timeframe change selector
+            HStack(spacing: 6) {
+                Text("% Change:")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Theme.textTertiary)
+
+                Button {
+                    showTimeFramePicker = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(viewModel.watchlistChangeTimeFrame.label)
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 8, weight: .bold))
+                    }
+                    .foregroundStyle(Theme.accent)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Theme.accent.opacity(0.12)))
+                }
+
+                if viewModel.isLoadingPeriodChanges {
+                    ProgressView()
+                        .tint(Theme.textTertiary)
+                        .scaleEffect(0.6)
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 8)
 
             // Ticker list
             if viewModel.tickers.isEmpty && !viewModel.isLoading {
@@ -96,6 +129,16 @@ struct TickerListView: View {
                 viewModel.setHomeMetrics(metrics)
             }
             .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showTimeFramePicker) {
+            WatchlistTimeFramePickerView(
+                selected: viewModel.watchlistChangeTimeFrame,
+                onSelect: { tf in
+                    viewModel.setWatchlistChangeTimeFrame(tf)
+                    showTimeFramePicker = false
+                }
+            )
+            .presentationDetents([.medium])
         }
     }
 
@@ -189,6 +232,57 @@ struct MetricPickerView: View {
                     .foregroundStyle(Theme.accent)
                 }
             }
+            .toolbarBackground(Theme.background, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+        }
+    }
+}
+
+// MARK: - Watchlist Timeframe Picker
+
+struct WatchlistTimeFramePickerView: View {
+    let selected: TimeFrame
+    let onSelect: (TimeFrame) -> Void
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Theme.background.ignoresSafeArea()
+                ScrollView {
+                    LazyVGrid(columns: [
+                        GridItem(.flexible()),
+                        GridItem(.flexible()),
+                        GridItem(.flexible()),
+                        GridItem(.flexible()),
+                    ], spacing: 10) {
+                        ForEach(TimeFrame.allCases) { tf in
+                            Button {
+                                onSelect(tf)
+                            } label: {
+                                VStack(spacing: 2) {
+                                    Text(tf.label)
+                                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    Text(tf.fullTitle)
+                                        .font(.system(size: 9, weight: .medium))
+                                        .lineLimit(1)
+                                }
+                                .foregroundStyle(tf == selected ? Theme.textPrimary : Theme.textSecondary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(tf == selected ? Theme.accent.opacity(0.2) : Theme.surfaceElevated)
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .stroke(tf == selected ? Theme.accent : Theme.cardBorder, lineWidth: tf == selected ? 1.5 : 0.5)
+                                )
+                            }
+                        }
+                    }
+                    .padding(16)
+                }
+            }
+            .navigationTitle("% Change Period")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Theme.background, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
         }

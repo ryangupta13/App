@@ -28,6 +28,11 @@ final class StockViewModel {
     // Customizable home screen metrics
     var homeMetrics: [TickerMetric] = TickerMetric.defaultHomeMetrics
 
+    // Watchlist % change timeframe (defaults to intraday)
+    var watchlistChangeTimeFrame: TimeFrame = .day
+    var periodChanges: [String: Double] = [:]  // yahooSymbol -> % change for selected period
+    var isLoadingPeriodChanges = false
+
     // Search (async)
     var searchQuery = ""
     var searchResults: [TickerSearchItem] = []
@@ -41,6 +46,7 @@ final class StockViewModel {
     private let storageKey = "savedTickers"
     private let metricsKey = "homeMetrics"
     private let timeFramesKey = "pageTimeFrames"
+    private let watchlistTFKey = "watchlistChangeTimeFrame"
 
     // MARK: - Pages
 
@@ -78,6 +84,7 @@ final class StockViewModel {
         loadTickers()
         loadMetricPreferences()
         loadTimeFramePreferences()
+        loadWatchlistTimeFrame()
     }
 
     // MARK: - Initial Data Load
@@ -100,6 +107,11 @@ final class StockViewModel {
 
         // Load sparklines
         await loadSparklines()
+
+        // Load period changes if not using default intraday
+        if watchlistChangeTimeFrame != .day {
+            await loadPeriodChanges()
+        }
     }
 
     // MARK: - Refresh Prices
@@ -248,6 +260,39 @@ final class StockViewModel {
         return data
     }
 
+    // MARK: - Watchlist % Change Timeframe
+
+    func changeForTicker(_ ticker: Ticker) -> Double {
+        if watchlistChangeTimeFrame == .day {
+            return ticker.dayChangePercent
+        }
+        return periodChanges[ticker.yahooSymbol] ?? ticker.dayChangePercent
+    }
+
+    func setWatchlistChangeTimeFrame(_ tf: TimeFrame) {
+        watchlistChangeTimeFrame = tf
+        periodChanges = [:]
+        saveWatchlistTimeFrame()
+        if tf != .day {
+            Task { await loadPeriodChanges() }
+        }
+    }
+
+    func loadPeriodChanges() async {
+        guard watchlistChangeTimeFrame != .day else { return }
+        await MainActor.run { isLoadingPeriodChanges = true }
+        for ticker in tickers {
+            let history = await service.fetchPriceHistory(for: ticker, timeFrame: watchlistChangeTimeFrame)
+            if let first = history.first?.price, let last = history.last?.price, first > 0 {
+                let change = ((last - first) / first) * 100
+                await MainActor.run {
+                    periodChanges[ticker.yahooSymbol] = change
+                }
+            }
+        }
+        await MainActor.run { isLoadingPeriodChanges = false }
+    }
+
     // MARK: - Persistence
 
     private func saveTickers() {
@@ -291,6 +336,17 @@ final class StockViewModel {
                     pageTimeFrames[idx] = tf
                 }
             }
+        }
+    }
+
+    private func saveWatchlistTimeFrame() {
+        UserDefaults.standard.set(watchlistChangeTimeFrame.rawValue, forKey: watchlistTFKey)
+    }
+
+    private func loadWatchlistTimeFrame() {
+        let raw = UserDefaults.standard.integer(forKey: watchlistTFKey)
+        if let tf = TimeFrame(rawValue: raw) {
+            watchlistChangeTimeFrame = tf
         }
     }
 }

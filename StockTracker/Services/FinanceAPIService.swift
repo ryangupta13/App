@@ -92,6 +92,44 @@ actor FinanceAPIService {
     }
 
     func fetchQuote(symbol: String) async throws -> QuoteData {
+        // Fetch chart data and price summary in parallel for complete data
+        async let chartTask = fetchChartData(symbol: symbol)
+        async let priceTask = fetchPriceData(symbol: symbol)
+
+        let chart = try await chartTask
+        let priceData = try? await priceTask
+
+        let currentPrice = chart.currentPrice
+        let previousClose = chart.previousClose
+        let changePercent = previousClose > 0 ? ((currentPrice - previousClose) / previousClose) * 100 : 0
+
+        return QuoteData(
+            currentPrice: currentPrice,
+            previousClose: previousClose,
+            dayChangePercent: changePercent,
+            movingAverage50: chart.fiftyDayAverage,
+            volume: chart.volume,
+            marketCap: priceData?.marketCap ?? 0,
+            fiftyTwoWeekHigh: priceData?.fiftyTwoWeekHigh ?? chart.fiftyTwoWeekHigh,
+            fiftyTwoWeekLow: priceData?.fiftyTwoWeekLow ?? chart.fiftyTwoWeekLow,
+            averageVolume: priceData?.averageVolume ?? chart.averageVolume,
+            name: chart.name
+        )
+    }
+
+    // Chart API for price + name
+    private struct ChartQuote: Sendable {
+        let currentPrice: Double
+        let previousClose: Double
+        let fiftyDayAverage: Double
+        let volume: Double
+        let fiftyTwoWeekHigh: Double
+        let fiftyTwoWeekLow: Double
+        let averageVolume: Double
+        let name: String
+    }
+
+    private func fetchChartData(symbol: String) async throws -> ChartQuote {
         let encoded = symbol.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? symbol
         var components = URLComponents(string: chartBaseURL + encoded)!
         components.queryItems = [
@@ -111,21 +149,48 @@ actor FinanceAPIService {
         }
 
         let meta = result.meta
-        let currentPrice = meta.regularMarketPrice ?? 0
-        let previousClose = meta.chartPreviousClose ?? meta.previousClose ?? 0
-        let changePercent = previousClose > 0 ? ((currentPrice - previousClose) / previousClose) * 100 : 0
-
-        return QuoteData(
-            currentPrice: currentPrice,
-            previousClose: previousClose,
-            dayChangePercent: changePercent,
-            movingAverage50: meta.fiftyDayAverage ?? 0,
+        return ChartQuote(
+            currentPrice: meta.regularMarketPrice ?? 0,
+            previousClose: meta.chartPreviousClose ?? meta.previousClose ?? 0,
+            fiftyDayAverage: meta.fiftyDayAverage ?? 0,
             volume: Double(meta.regularMarketVolume ?? 0),
-            marketCap: 0,
             fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh ?? 0,
             fiftyTwoWeekLow: meta.fiftyTwoWeekLow ?? 0,
             averageVolume: Double(meta.averageDailyVolume3Month ?? 0),
             name: meta.longName ?? meta.shortName ?? symbol
+        )
+    }
+
+    // QuoteSummary price module for marketCap + enriched data
+    private struct PriceModuleData: Sendable {
+        let marketCap: Double
+        let fiftyTwoWeekHigh: Double
+        let fiftyTwoWeekLow: Double
+        let averageVolume: Double
+    }
+
+    private func fetchPriceData(symbol: String) async throws -> PriceModuleData {
+        let encoded = symbol.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? symbol
+        var components = URLComponents(string: quoteBaseURL + encoded)!
+        components.queryItems = [
+            URLQueryItem(name: "modules", value: "price,summaryDetail"),
+        ]
+
+        let (data, response) = try await session.data(from: components.url!)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw FinanceAPIError.invalidResponse
+        }
+
+        let summaryResponse = try JSONDecoder().decode(YFQuoteSummaryResponse.self, from: data)
+        guard let resultItem = summaryResponse.quoteSummary.result?.first else {
+            throw FinanceAPIError.noData
+        }
+
+        return PriceModuleData(
+            marketCap: resultItem.price?.marketCap?.raw ?? 0,
+            fiftyTwoWeekHigh: resultItem.summaryDetail?.fiftyTwoWeekHigh?.raw ?? 0,
+            fiftyTwoWeekLow: resultItem.summaryDetail?.fiftyTwoWeekLow?.raw ?? 0,
+            averageVolume: resultItem.summaryDetail?.averageVolume?.raw ?? 0
         )
     }
 

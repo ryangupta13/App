@@ -42,18 +42,19 @@ struct TickerRowView: View {
                             .font(.system(size: 16, weight: .bold, design: .rounded))
                             .foregroundStyle(Theme.textPrimary)
 
+                        let change = viewModel.changeForTicker(ticker)
                         HStack(spacing: 3) {
-                            Image(systemName: ticker.isPositive ? "arrow.up.right" : "arrow.down.right")
+                            Image(systemName: change >= 0 ? "arrow.up.right" : "arrow.down.right")
                                 .font(.system(size: 9, weight: .bold))
-                            Text(Theme.formatChange(ticker.dayChangePercent))
+                            Text(Theme.formatChange(change))
                                 .font(.system(size: 12, weight: .semibold, design: .rounded))
                         }
-                        .foregroundStyle(Theme.changeColor(for: ticker.dayChangePercent))
+                        .foregroundStyle(Theme.changeColor(for: change))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
                         .background(
                             Capsule()
-                                .fill(Theme.changeColor(for: ticker.dayChangePercent).opacity(0.15))
+                                .fill(Theme.changeColor(for: change).opacity(0.15))
                         )
                     }
                 }

@@ -46,12 +46,24 @@ enum Theme {
     static let cornerRadius: CGFloat = 16
     static let cornerRadiusSmall: CGFloat = 10
 
+    // MARK: - Number Formatters
+
+    private static let commaFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.groupingSeparator = ","
+        f.usesGroupingSeparator = true
+        return f
+    }()
+
     // MARK: - Formatting
+
     static func formatPrice(_ price: Double) -> String {
-        if price >= 10000 {
-            return String(format: "$%.0f", price)
-        } else if price >= 1000 {
-            return String(format: "$%.1f", price)
+        if price >= 1000 {
+            let f = commaFormatter.copy() as! NumberFormatter
+            f.maximumFractionDigits = price >= 10000 ? 0 : 2
+            f.minimumFractionDigits = price >= 10000 ? 0 : 2
+            return "$" + (f.string(from: NSNumber(value: price)) ?? String(format: "%.0f", price))
         } else if price >= 1 {
             return String(format: "$%.2f", price)
         } else if price > 0 {
@@ -63,11 +75,16 @@ enum Theme {
 
     static func formatPriceSigned(_ price: Double) -> String {
         let sign = price >= 0 ? "+" : ""
-        if abs(price) >= 1000 {
-            return String(format: "%@$%.1f", sign, abs(price))
-        } else if abs(price) >= 1 {
+        let absVal = abs(price)
+        if absVal >= 1000 {
+            let f = commaFormatter.copy() as! NumberFormatter
+            f.maximumFractionDigits = 2
+            f.minimumFractionDigits = 2
+            let formatted = f.string(from: NSNumber(value: absVal)) ?? String(format: "%.2f", absVal)
+            return "\(sign)$\(formatted)"
+        } else if absVal >= 1 {
             return String(format: "%@$%.2f", sign, price)
-        } else if abs(price) > 0 {
+        } else if absVal > 0 {
             return String(format: "%@$%.4f", sign, price)
         } else {
             return "$0.00"
