@@ -9,6 +9,9 @@ actor FinanceAPIService {
     private let chartBaseURL = "https://query1.finance.yahoo.com/v8/finance/chart/"
     private let searchBaseURL = "https://query1.finance.yahoo.com/v1/finance/search"
     private let quoteBaseURL = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+    private let crumbURL = "https://query2.finance.yahoo.com/v1/test/getcrumb"
+
+    private var crumb: String?
 
     init() {
         let config = URLSessionConfiguration.default
@@ -16,7 +19,61 @@ actor FinanceAPIService {
         config.httpAdditionalHeaders = [
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
         ]
+        config.httpCookieAcceptPolicy = .always
+        config.httpShouldSetCookies = true
+        config.httpCookieStorage = .shared
         self.session = URLSession(configuration: config)
+    }
+
+    // MARK: - Crumb Authentication
+
+    private func ensureCrumb() async throws -> String {
+        if let crumb = crumb { return crumb }
+
+        // Step 1: Hit consent page to get cookies
+        let consentURL = URL(string: "https://fc.yahoo.com/")!
+        _ = try? await session.data(from: consentURL)
+
+        // Step 2: Fetch crumb using the cookies
+        let (data, response) = try await session.data(from: URL(string: crumbURL)!)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200,
+              let crumbValue = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !crumbValue.isEmpty else {
+            throw FinanceAPIError.invalidResponse
+        }
+
+        self.crumb = crumbValue
+        return crumbValue
+    }
+
+    private func fetchWithCrumb(path: String, modules: String) async throws -> (Data, URLResponse) {
+        var crumb = try await ensureCrumb()
+        var components = URLComponents(string: path)!
+        components.queryItems = [
+            URLQueryItem(name: "modules", value: modules),
+            URLQueryItem(name: "crumb", value: crumb),
+        ]
+
+        let (data, response) = try await session.data(from: components.url!)
+        if let http = response as? HTTPURLResponse, http.statusCode == 401 {
+            // Crumb expired — clear and retry once
+            self.crumb = nil
+            crumb = try await ensureCrumb()
+            components.queryItems = [
+                URLQueryItem(name: "modules", value: modules),
+                URLQueryItem(name: "crumb", value: crumb),
+            ]
+            let (retryData, retryResponse) = try await session.data(from: components.url!)
+            guard let retryHttp = retryResponse as? HTTPURLResponse, retryHttp.statusCode == 200 else {
+                throw FinanceAPIError.invalidResponse
+            }
+            return (retryData, retryResponse)
+        }
+
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw FinanceAPIError.invalidResponse
+        }
+        return (data, response)
     }
 
     // MARK: - Search Symbols
@@ -171,15 +228,8 @@ actor FinanceAPIService {
 
     private func fetchPriceData(symbol: String) async throws -> PriceModuleData {
         let encoded = symbol.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? symbol
-        var components = URLComponents(string: quoteBaseURL + encoded)!
-        components.queryItems = [
-            URLQueryItem(name: "modules", value: "price,summaryDetail"),
-        ]
 
-        let (data, response) = try await session.data(from: components.url!)
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            throw FinanceAPIError.invalidResponse
-        }
+        let (data, _) = try await fetchWithCrumb(path: quoteBaseURL + encoded, modules: "price,summaryDetail")
 
         let summaryResponse = try JSONDecoder().decode(YFQuoteSummaryResponse.self, from: data)
         guard let resultItem = summaryResponse.quoteSummary.result?.first else {
@@ -256,15 +306,8 @@ actor FinanceAPIService {
     func fetchFundamentals(symbol: String) async throws -> FundamentalData {
         let encoded = symbol.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? symbol
         let modules = "defaultKeyStatistics,financialData,summaryDetail,earnings,price"
-        var components = URLComponents(string: quoteBaseURL + encoded)!
-        components.queryItems = [
-            URLQueryItem(name: "modules", value: modules),
-        ]
 
-        let (data, response) = try await session.data(from: components.url!)
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            throw FinanceAPIError.invalidResponse
-        }
+        let (data, _) = try await fetchWithCrumb(path: quoteBaseURL + encoded, modules: modules)
 
         let summaryResponse = try JSONDecoder().decode(YFQuoteSummaryResponse.self, from: data)
         guard let resultItem = summaryResponse.quoteSummary.result?.first else {
